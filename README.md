@@ -1,4 +1,4 @@
-# Adorefy — Sistema de Escalas Ministeriais
+<img width="1538" height="1056" alt="image" src="https://github.com/user-attachments/assets/bc595a32-7513-4638-9360-3de711f142c1" /># Adorefy — Sistema de Escalas Ministeriais
 
 Sistema para organização de escalas ministeriais, membros, ministérios, músicas, notificações e controle de indisponibilidade.
 
