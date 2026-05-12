@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChurchTime - Gestão Ministerial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">
+                     <img src="https://agillize.com/churchtime/logo.png" alt="ChurchTime Logo">
+                </div>
+                <h1 class="login-title">ChurchTime</h1>
+                <p class="login-subtitle">Sua comunidade conectada</p>
+            </div>
+            
+            <div class="login-tabs">
+                <button class="login-tab active" data-tab="login">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+                <button class="login-tab" data-tab="register">
+                    <i class="fas fa-user-plus"></i> Cadastrar
+                </button>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="Sua senha" required>
+                </div>
+                <button type="button" class="btn btn-primary btn-block" id="loginBtn">
+                    <i class="fas fa-paper-plane"></i> Entrar
+                </button>
+            </form>
+            
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" class="form-input" id="registerName" placeholder="Seu nome completo" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="registerEmail" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="registerPassword" placeholder="Crie uma senha" required>
+                </div>
+                <button type="button" class="btn btn-primary btn-block" id="registerBtn">
+                    <i class="fas fa-user-plus"></i> Criar Conta
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Aplicação Principal -->
+    <div id="appScreen" style="display: none;">
+        <!-- Header Superior -->
+        <div class="app-header">
+            <div class="header-content">
+                <!-- Logo e Título -->
+			<div class="header-brand">
+			    <div class="app-logo">
+				<img src="https://agillize.com/churchtime/logo.png" alt="ChurchTime Logo">
+			    </div>
+			    <span class="app-title">ChurchTime</span>
+			</div>
+
+                
+                <!-- Ações do Usuário -->
+                <div class="header-actions">
+                    <!-- Informações do Usuário (visível em desktop) -->
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <div class="user-details">
+                            <div class="user-name" id="userName"></div>
+                            <div class="user-role" id="userRole"></div>
+                        </div>
+                        <div class="status-dot"></div>
+                    </div>
+                    
+                  <!-- Botões de Gestão com Permissões -->
+<div class="header-management" id="headerManagement" style="display: none;">
+    <!-- Botão de Solicitações Pendentes - Apenas para quem pode aprovar -->
+    <button class="header-btn" id="pendingRequestsBtn" title="Solicitações Pendentes" data-permission="approve_unavailability">
+        <i class="fas fa-user-clock"></i>
+        <span class="notification-badge pending-badge" id="pendingRequestsBadge" style="display: none;">0</span>
+    </button>
+    
+    <!-- Botão de Gestão de Membros - Apenas para quem pode gerenciar membros -->
+    <button class="header-btn" id="managementBtn" title="Gestão de Membros" data-permission="manage_members">
+        <i class="fas fa-users-cog"></i>
+    </button>
+    
+    <!-- Botão de Gestão de Músicas - Apenas para quem pode gerenciar músicas -->
+    <button class="header-btn" id="musicManagementBtn" title="Gestão de Músicas" data-permission="manage_music">
+        <i class="fas fa-music"></i>
+    </button>
+    
+    <div class="nav-item" data-nav="functions">
+    <i class="fas fa-user-tag"></i>
+    <span>Funções</span>
+</div>
+    
+    <!-- Botão de Gestão de Ministérios - Apenas para administradores -->
+    <button class="header-btn" id="ministryManagementBtn" title="Gestão de Ministérios" data-permission="manage_ministries">
+        <i class="fas fa-bullhorn"></i>
+    </button>
+</div>
+                    
+                    <!-- Botões comuns -->
+                    <button class="notification-btn" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationsBadge" style="display: none;">3</span>
+                    </button>
+                    
+                    <button class="settings-btn" id="settingsBtn">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Conteúdo Principal -->
+        <div id="appContent">
+            <!-- Conteúdo será carregado aqui dinamicamente -->
+        </div>
+        
+        <!-- Navegação Inferior Simplificada -->
+        <div class="bottom-nav">
+            <div class="nav-item active" data-nav="home">
+                <i class="fas fa-home"></i>
+                <span>Início</span>
+            </div>
+            <div class="nav-item" data-nav="members">
+                <i class="fas fa-users"></i>
+                <span>Membros</span>
+            </div>
+            <div class="nav-item" data-nav="calendar">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Calendário</span>
+               
+            </div>
+             <div class="nav-item" data-nav="ministries">
+                <i class="fas fa-layer-group nav-icon"></i>
+                <span>Ministérios</span>
+            </div>
+            <div class="nav-item" data-nav="add">
+                <i class="fas fa-plus-circle"></i>
+                <span>Adicionar</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div class="toast" id="toast"></div>
+    
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

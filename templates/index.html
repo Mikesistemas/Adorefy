@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adorefy - Gestão Ministerial</title>
+      <link rel="icon" href="static/img/login.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+
+     <style>
+    /* ===== ACESSOS AO MENU (TEMA CLARO) ===== */
+    #loginBackground {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background: var(--secondary);
+    }
+    .background {
+      position: absolute;
+      inset: 0;
+      /*background-image: url("/static/img/background.png");*/
+      background-size: cover;
+      background-position: center;
+      filter: brightness(1.05) saturate(1.05);
+      animation: bgMove 40s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    #particles { position: absolute; inset: 0; pointer-events: none; }
+
+    #loginScreen {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .login-container { width: 100%; max-width: 420px; }
+
+    @media (max-width: 600px) {
+      .app-title { font-size: 44px !important; }
+      .login-container { padding: 20px; }
+    }
+    @keyframes bgMove {
+      from { transform: scale(1) translateY(0); }
+      to   { transform: scale(1.05) translateY(-20px); }
+    }
+
+    /* ===== HAMBURGER / MENU ===== */
+    .hamburger-menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: all 0.25s ease;
+      min-width: 60px;
+      font-size: 12px;
+    }
+    .hamburger-menu-btn:hover { background: var(--secondary-lighter); color: var(--text-primary); }
+    .hamburger-menu-btn.active { color: var(--primary); background: rgba(37, 99, 235, 0.10); }
+
+    .hamburger-icon { font-size: 18px; display: flex; flex-direction: column; gap: 3px; }
+    .hamburger-icon span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background-color: currentColor;
+      border-radius: 1px;
+      transition: all 0.25s ease;
+    }
+    .hamburger-menu-btn.active .hamburger-icon span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+    .hamburger-menu-btn.active .hamburger-icon span:nth-child(2) { opacity: 0; }
+    .hamburger-menu-btn.active .hamburger-icon span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+    .header-hamburger-btn {
+      display: none;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      margin-right: 15px;
+    }
+    .header-hamburger-btn:hover { background: var(--secondary-lighter); }
+    .header-hamburger-btn.active { color: var(--primary); background: rgba(37, 99, 235, 0.10); }
+
+    .user-info {
+      cursor: pointer;
+      transition: all 0.25s ease;
+      border-radius: 10px;
+      padding: 6px;
+    }
+    .user-info:hover { background: var(--secondary-lighter); }
+    .user-info:active { transform: scale(0.98); }
+
+    .keyboard-shortcut-hint {
+      position: fixed;
+      bottom: 70px;
+      right: 10px;
+      background: var(--secondary-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      z-index: 999;
+      opacity: 0.9;
+      box-shadow: 0 10px 30px var(--shadow);
+      animation: pulse 2s infinite;
+      display: none;
+    }
+    @keyframes pulse { 0%{transform:translateY(0)} 50%{transform:translateY(-2px)} 100%{transform:translateY(0)} }
+
+    .swipe-indicator {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      font-size: 20px;
+      opacity: 0.5;
+      animation: bounce 2s infinite;
+      display: none;
+    }
+    @keyframes bounce {
+      0%,100%{transform:translateY(-50%) translateX(0)}
+      50%{transform:translateY(-50%) translateX(6px)}
+    }
+
+    .mobile-sidebar {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 280px;
+      height: 100vh;
+      background: var(--secondary-light);
+      border-right: 1px solid var(--border);
+      z-index: 1001;
+      transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-shadow: 10px 0 30px var(--shadow);
+    }
+    .mobile-sidebar.show { left: 0; }
+
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.30);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .sidebar-overlay.show { opacity: 1; visibility: visible; }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--secondary-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .sidebar-header:hover { background: var(--secondary-lighter); }
+
+    .sidebar-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.18);
+    }
+
+    .sidebar-user-info h3 { font-size: 16px; margin-bottom: 4px; color: var(--text-primary); }
+    .sidebar-user-info p  { font-size: 13px; color: var(--text-secondary); }
+
+    .sidebar-menu { padding: 16px 0; }
+    .menu-section { padding: 0 0 16px 0; }
+    .menu-title {
+      padding: 0 16px 8px 16px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.18s ease;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      font-size: 14px;
+      animation: slideInLeft 0.28s ease forwards;
+      opacity: 0;
+    }
+    .menu-item:hover {
+      background: var(--secondary-lighter);
+      color: var(--text-primary);
+      border-left-color: var(--primary);
+      padding-left: 20px;
+    }
+    .menu-item.active {
+      background: rgba(37, 99, 235, 0.10);
+      color: var(--primary);
+      border-left-color: var(--primary);
+      font-weight: 600;
+    }
+    .menu-item i { width: 20px; text-align: center; font-size: 16px; }
+    .menu-item .badge {
+      margin-left: auto;
+      background: var(--primary);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .menu-divider { height: 1px; background: var(--border-light); margin: 8px 16px; }
+    .sidebar-footer {
+      padding: 20px 16px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+      background: var(--secondary-light);
+    }
+
+    @keyframes slideInLeft { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
+    .menu-item:nth-child(1) { animation-delay: 0.08s; }
+    .menu-item:nth-child(2) { animation-delay: 0.12s; }
+    .menu-item:nth-child(3) { animation-delay: 0.16s; }
+    .menu-item:nth-child(4) { animation-delay: 0.20s; }
+    .menu-item:nth-child(5) { animation-delay: 0.24s; }
+    .menu-item:nth-child(6) { animation-delay: 0.28s; }
+    .menu-item:nth-child(7) { animation-delay: 0.32s; }
+    .menu-item:nth-child(8) { animation-delay: 0.36s; }
+    .menu-item:nth-child(9) { animation-delay: 0.40s; }
+    .menu-item:nth-child(10){ animation-delay: 0.44s; }
+
+    @media (max-width: 480px) {
+      .mobile-sidebar { width: 260px; left: -260px; }
+      .sidebar-header { padding: 16px; }
+      .menu-item { padding: 12px 14px; }
+      .swipe-indicator { display: block; }
+      .keyboard-shortcut-hint { display: block; }
+    }
+    @media (max-width: 360px) { .mobile-sidebar { width: 240px; left: -240px; } }
+    @media (min-width: 481px) { .header-hamburger-btn { display: flex; } .hamburger-menu-btn { display: none; } }
+    @media (min-width: 1024px) {
+      .mobile-sidebar { width: 300px; left: -300px; }
+      .keyboard-shortcut-hint { display: block; }
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .menu-item { padding: 16px 16px; min-height: 50px; }
+      .user-info { padding: 10px; }
+    }
+
+    /* ===== MODAL REGISTER ===== */
+    .modal-overlay{
+      position:fixed; inset:0; z-index:5000;
+      display:none; align-items:center; justify-content:center;
+      padding:18px;
+      background:rgba(17,24,39,.30);
+      backdrop-filter:blur(6px);
+    }
+    .modal-overlay.show{ display:flex; }
+
+    .modal-card{
+      width:100%; max-width:460px;
+      background:var(--secondary-light);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 24px 70px var(--shadow);
+      overflow:hidden;
+      transform:translateY(8px) scale(.99);
+      opacity:0;
+      animation:modalIn .22s ease forwards;
+    }
+    @keyframes modalIn{ to{ transform:translateY(0) scale(1); opacity:1; } }
+    .modal-topbar{ height:6px; background:var(--gradient); }
+    .modal-body{ padding:18px 18px 16px; }
+
+    .modal-title{
+      display:flex; align-items:center; gap:10px;
+      font-size:16px; font-weight:800;
+      color:var(--text-primary);
+      margin:0 0 10px 0;
+    }
+    .modal-subtitle{
+      margin:0;
+      color:var(--text-secondary);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .loader{
+      width:44px; height:44px; border-radius:999px;
+      border:3px solid var(--border-light);
+      border-top-color:var(--primary);
+      animation:spin .9s linear infinite;
+      flex:0 0 auto;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+
+    .success-badge{
+      width:44px; height:44px; border-radius:999px;
+      background:rgba(22,163,74,.12);
+      border:1px solid rgba(22,163,74,.22);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--success); font-size:18px;
+      flex:0 0 auto;
+    }
+    .error-badge{
+      width:44px; height:44px; border-radius:999px;
+      background:rgba(220,38,38,.10);
+      border:1px solid rgba(220,38,38,.22);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--danger); font-size:18px;
+      flex:0 0 auto;
+    }
+
+    .modal-actions{
+      padding:12px 18px 18px;
+      display:flex; gap:10px; justify-content:flex-end;
+      border-top:1px solid var(--border-light);
+      background:var(--secondary-light);
+    }
+    .btn-modal{
+      border:1px solid var(--border);
+      background:var(--secondary-light);
+      color:var(--text-primary);
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:all .18s ease;
+    }
+    .btn-modal:hover{ background:var(--secondary-lighter); }
+    .btn-modal.primary{ border:none; background:var(--primary); color:#fff; }
+    .btn-modal.primary:hover{ background:var(--primary-dark); }
+
+    /* ===== Validação visual ===== */
+    .form-input.is-invalid {
+      border-color: rgba(220, 38, 38, 0.55) !important;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+    }
+    .form-input.is-valid {
+      border-color: rgba(22, 163, 74, 0.45) !important;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.10) !important;
+    }
+    .field-error {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--danger);
+      display: none;
+    }
+    .field-error.show { display: block; }
+
+    /* ✅ “Desabilitado” visual, mas clicável */
+    .btn-soft-disabled {
+      opacity: .65;
+      filter: saturate(.85);
+    }
+    .btn-soft-disabled:hover { transform: none !important; }
+
+    /* Linha de botões do login (Entrar + Cadastrar) */
+.login-actions-row{
+  display:flex;
+  gap:10px;               /* espaço entre eles */
+  margin-top:12px;
+}
+
+.login-actions-row .btn{
+  flex:1;                 /* metade/metade */
+  padding:10px 12px;      /* menores */
+  font-size:14px;
+  border-radius:12px;
+}
+
+/* deixa o botão "Cadastrar" com cara de secundário */
+.btn-register-inline{
+  background: var(--secondary-light) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition: all .18s ease;
+}
+
+.btn-register-inline:hover{
+  background: var(--secondary-lighter) !important;
+  transform: translateY(-1px);
+}
+
+/* Responsivo: em telas bem pequenas, empilha */
+@media (max-width: 380px){
+  .login-actions-row{
+    flex-direction:column;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+<div id="loginBackground">
+  <div class="background"></div>
+  <canvas id="particles"></canvas>
+</div>
+
+    <!-- Tela de Login -->
+    <div id="loginScreen" style="background: none !important;">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">
+                    <img src="/static/img/login.png" alt="Adorefy Logo">
+                </div>
+                <span class="app-title" style="font-family: 'Lobster', cursive; font-size: 60px; color: #9146FF;">Adorefy</span>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="Sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+                    <i class="fas fa-paper-plane"></i> Entrar
+                </button>
+                <button class="login-tab" data-tab="register">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Cadastrar</span>
+                </button>
+            </form>
+
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" class="form-input" id="registerName" placeholder="Seu nome completo" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="registerEmail" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nome da Igreja</label>
+                    <input type="text" class="form-input" id="registerIgreja" placeholder="Igreja" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefone</label>
+                    <input type="number" class="form-input" id="registerNumber" placeholder="Numero com ddd" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="registerPassword" placeholder="Crie uma senha" required>
+                </div>
+                <button type="button" class="btn btn-primary btn-block" id="registerBtn">
+                    <i class="fas fa-user-plus"></i> Criar Conta
+                </button>
+            </form>
+
+        </div>
+    </div>
+    
+    <!-- Aplicação Principal -->
+    <div id="appScreen" style="display: none;">
+        <!-- Header Superior -->
+        <div class="app-header">
+            <div class="header-content">
+                <!-- Logo e Título -->
+                <div class="header-brand">
+                    <!-- Botão Hambúrguer no Header (Desktop) -->
+                    <button class="header-hamburger-btn" id="headerHamburgerBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div class="app-logo">
+                        <img src="/static/img/logo.png" alt="Adorefy Logo">
+                    </div>
+                    <span class="app-title" style="font-family: 'Lobster', cursive; font-size: 48px; color: #9146FF;">Adorefy</span>
+                </div>
+                
+                <!-- Ações do Usuário -->
+                <div class="header-actions" id="headerManagement" style="display: none;">
+                    <!-- Informações do Usuário (visível em desktop) -->
+                    <div class="user-info" id="userInfoMenuTrigger">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <div class="user-details">
+                            <div class="user-name" id="userName"></div>
+                            <div class="user-role" id="userRole"></div>
+                        </div>
+                        <div class="status-dot"></div>
+                    </div>
+                    
+                    <!-- Botões de Gestão com Permissões -->
+                    
+                    
+                    <!-- Botões comuns 
+                    <div class="header-management" id="headerManagement" style="display: none;">
+                        <button class="header-btn" id="pendingRequestsBtn" title="Solicitações Pendentes" data-permission="approve_unavailability">
+                            <i class="fas fa-user-clock"></i>
+                            <span class="notification-badge pending-badge" id="pendingRequestsBadge" style="display: none;">0</span>
+                        </button>
+                        
+                    </div>-->
+                     <button class="notification-btn" id="pendingRequestsBtn" title="Solicitações Pendentes" data-permission="approve_unavailability">
+                            <i class="fas fa-user-clock"></i>
+                            <span class="notification-badge pending-badge" id="pendingRequestsBadge" style="display: none;">0</span>
+                        </button>
+                    <button class="notification-btn" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationsBadge" style="display: none;">3</span>
+                    </button>
+                    
+                    <button class="settings-btn" id="settingsBtn">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Conteúdo Principal -->
+        <div id="appContent">
+            <!-- Conteúdo será carregado aqui dinamicamente -->
+        </div>
+        
+        <!-- Swipe Indicator (Mobile) -->
+        <div class="swipe-indicator" id="swipeIndicator">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+        
+        <!-- Navegação Inferior Simplificada -->
+        <div class="bottom-nav">
+            <div class="nav-item active" data-nav="home">
+                <i class="fas fa-home"></i>
+                <span>Início</span>
+            </div>
+            <div class="nav-item" data-nav="members">
+                <i class="fas fa-users"></i>
+                <span>Membros</span>
+            </div>
+            <div class="nav-item" data-nav="calendar">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Calendário</span>
+            </div>
+            <div class="nav-item" data-nav="ministries">
+                <i class="fas fa-layer-group nav-icon"></i>
+                <span>Ministérios</span>
+            </div>
+            
+            <!-- Botão Hambúrguer na Bottom Nav (Mobile) -->
+            <button class="hamburger-menu-btn" id="hamburgerMenuBtn">
+                <div class="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>Menu</span>
+            </button>
+        </div>
+
+        <!-- Botão Flutuante de Adicionar 
+        <div class="nav-item fab-add floating-add-btn" data-nav="add" id="add">
+            <i class="fas fa-plus"></i>
+        </div>-->
+
+        <!-- Menu Lateral Suspenso -->
+        <aside class="mobile-sidebar" id="mobileSidebar">
+            <div class="sidebar-header" id="sidebarHeader">
+                <div class="sidebar-avatar" id="sidebarAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="sidebar-user-info">
+                    <h3 id="userName_nav">Carregando...</h3>
+                    <p id="userRole_nav">Usuário</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-title">Navegação Principal</div>
+                    <button class="menu-item" id='musicManagementBtn' data-nav="home">
+                        <i class="fas fa-home"></i>
+                        <span>Início</span>
+                    </button>
+                    <button class="menu-item" id='musicManagementBtn' data-nav="members">
+                        <i class="fas fa-users"></i>
+                        <span>Membros</span>
+                    </button>
+                    <button class="menu-item" id='musicManagementBtn' data-nav="calendar">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Calendário</span>
+                    </button>
+                    <button class="menu-item" id='musicManagementBtn' data-nav="ministries">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Ministérios</span>
+                    </button>
+                     <button class="menu-item nav-item3" id='musicManagementBtn' data-nav="add">
+                        <i class="fas fa-plus"></i>
+                        <span>Adicionar/Criar</span>
+                    </button>
+                </div>
+
+                <div class="menu-divider"></div>
+
+                <div class="menu-section">
+                    <div class="menu-title">Gestão do Ministério</div>
+                    <!-- Funções (movido da bottom-nav para aqui) -->
+                    
+                    
+                    <!-- Músicas (se o usuário tiver permissão) -->
+                    <button class="menu-item" id="musicManagementBtn" data-nav="music" data-permission="manage_music">
+                        <i class="fas fa-music"></i>
+                        <span>Repertório</span>
+                    </button>
+                    
+                    <!-- Solicitações (se o usuário tiver permissão) -->
+                    <button class="menu-item" data-nav="requests" id='managementBtn' data-permission="manage_members">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Gestor de Membros</span>
+                        <span class="badge" id="sidebarRequestsBadge" style="display: none;">0</span>
+                    </button>
+                      <button class="menu-item nav-item2" id='musicManagementBtn' data-nav="functions">
+                        <i class="fas fa-user-tag"></i>
+                        <span>Funções do ministério</span>
+                    </button>
+                     <button class="menu-item nav-item2" id='musicManagementBtn' data-nav="">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Avisos</span>
+                    </button>
+                    
+                    <!-- Configurações Avançadas (se o usuário tiver permissão) -->
+                    <button class="menu-item" data-nav="settings" style="display: none;" data-permission="manage_ministries">
+                        <i class="fas fa-cogs"></i>
+                        <span>Configurações Avançadas</span>
+                    </button>
+                </div>
+
+                <div class="menu-divider"></div>
+
+                <div class="menu-section">
+                    <button class="menu-item" id="sidebarLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair da Conta</span>
+                    </button>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="version-info">
+                    <small style="color: var(--text-tertiary);">Pressione <kbd>ESC</kbd></small>
+                    <br>
+                    <small style="color: var(--text-tertiary);">Adorefy feito com 💜 por <a href="https://agillize.com/mike"> @Mike </a></small>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Overlay para fechar o menu -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+       
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div class="toast" id="toast"></div>
+    
+    <script src="/static/js/script.js"></script>
+    <script>
+        // Script para controlar o menu com múltiplos acessos
+        $(document).ready(function() {
+            // Elementos principais
+            const hamburgerMenuBtn = $('#hamburgerMenuBtn');
+            const headerHamburgerBtn = $('#headerHamburgerBtn');
+            const userInfoMenuTrigger = $('#userInfoMenuTrigger');
+            const mobileSidebar = $('#mobileSidebar');
+            const sidebarOverlay = $('#sidebarOverlay');
+            const sidebarHeader = $('#sidebarHeader');
+            const keyboardHint = $('#keyboardHint');
+            const swipeIndicator = $('#swipeIndicator');
+            
+            // Estado do menu
+            let isMenuOpen = false;
+            $('#loginForm').on('submit', function (e) {
+            e.preventDefault(); 
+            $('#loginBtn').click(); 
+            });
+
+             
+
+            // Função para abrir o menu
+            function openMenu() {
+                mobileSidebar.addClass('show');
+                sidebarOverlay.addClass('show');
+                hamburgerMenuBtn.addClass('active');
+                headerHamburgerBtn.addClass('active');
+                headerHamburgerBtn.html('<i class="fas fa-times"></i>');
+                isMenuOpen = true;
+                
+                // Ocultar hint após abrir
+                keyboardHint.fadeOut(300);
+                swipeIndicator.fadeOut(300);
+                
+                // Disparar evento personalizado
+                $(document).trigger('menuOpened');
+            }
+            
+            // Função para fechar o menu
+            function closeMenu() {
+                mobileSidebar.removeClass('show');
+                sidebarOverlay.removeClass('show');
+                hamburgerMenuBtn.removeClass('active');
+                headerHamburgerBtn.removeClass('active');
+                headerHamburgerBtn.html('<i class="fas fa-bars"></i>');
+                isMenuOpen = false;
+                
+                // Disparar evento personalizado
+                $(document).trigger('menuClosed');
+            }
+            
+            // Função para alternar o menu
+            function toggleMenu() {
+                if (isMenuOpen) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            }
+            
+            // ===== MÚLTIPLAS FORMAS DE ACESSO =====
+            
+            // 1. Botão Hambúrguer na Bottom Nav (Mobile)
+            hamburgerMenuBtn.on('click', function(e) {
+                e.stopPropagation();
+                toggleMenu();
+            });
+            
+            // 2. Botão Hambúrguer no Header (Desktop)
+            headerHamburgerBtn.on('click', function(e) {
+                e.stopPropagation();
+                toggleMenu();
+            });
+            
+            // 3. Clicar no Avatar/Info do Usuário
+            userInfoMenuTrigger.on('click', function(e) {
+                e.stopPropagation();
+                toggleMenu();
+            });
+            
+            // 4. Clicar no Header do Sidebar (dentro do menu)
+            sidebarHeader.on('click', function(e) {
+                e.stopPropagation();
+  
+            });
+            
+            // 5. Atalhos de Teclado
+            $(document).on('keydown', function(e) {
+                // M ou m para abrir/fechar menu
+                //if (e.key === 'm' || e.key === 'M') {
+                //    e.preventDefault();
+                //    toggleMenu();
+                //}
+                
+                // ESC para fechar menu
+                if (e.key === 'Escape' && isMenuOpen) {
+                    closeMenu();
+                }
+                
+                // Números para navegação rápida (1-9)
+                if (isMenuOpen && e.key >= '1' && e.key <= '9') {
+                    const index = parseInt(e.key) - 1;
+                    const menuItems = $('.menu-item:visible');
+                    if (menuItems[index]) {
+                        $(menuItems[index]).click();
+                    }
+                }
+            });
+            
+            // 6. Swipe Gesture (para dispositivos touch)
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            $(document).on('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            $(document).on('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                const swipeDistance = touchEndX - touchStartX;
+                
+                // Swipe da esquerda para direita para abrir menu
+                if (!isMenuOpen && swipeDistance > swipeThreshold && touchStartX < 50) {
+                    openMenu();
+                }
+                
+                // Swipe da direita para esquerda para fechar menu
+                if (isMenuOpen && swipeDistance < -swipeThreshold) {
+                    closeMenu();
+                }
+            }
+            
+            // 7. Fechar menu ao clicar no overlay
+            sidebarOverlay.on('click', function() {
+                closeMenu();
+            });
+            
+            // 8. Fechar menu ao clicar em um item
+            $('.menu-item').on('click', function() {
+                // Fechar menu
+                closeMenu();
+                
+                // Ativar item clicado
+                $('.menu-item').removeClass('active');
+                $(this).addClass('active');
+                
+                // Navegação
+                const navTarget = $(this).data('nav');
+                if (navTarget) {
+                    $(`.nav-item[data-nav="${navTarget}"]`).click();
+                }
+                
+                // Ações especiais
+                const itemId = $(this).attr('id');
+                if (itemId === 'sidebarSettingsBtn') {
+                    $('#settingsBtn').click();
+                } else if (itemId === 'sidebarNotificationsBtn') {
+                    $('#notificationsBtn').click();
+                } else if (itemId === 'sidebarLogoutBtn') {
+                    $('#logoutBtn').click();
+                } else if (itemId === 'sidebarHelpBtn') {
+                    showToast('Abrindo ajuda...', 'info');
+                }
+            });
+            
+            // ===== FUNÇÕES AUXILIARES =====
+            
+            // Atualizar informações do usuário no menu lateral
+            function updateSidebarUserInfo(userData) {
+                if (userData) {
+                    const initials = userData.name ? userData.name.charAt(0).toUpperCase() : 'U';
+                    $('#sidebarAvatar').html(initials);
+                    $('#sidebarUserName').text(userData.name || 'Usuário');
+                    $('#sidebarUserRole').text(userData.role || 'Membro');
+                    
+                    // Atualizar permissões do menu
+                    updateMenuPermissions(userData.permissions || []);
+                }
+            }
+            
+            // Atualizar itens do menu baseado nas permissões
+            function updateMenuPermissions(permissions) {
+                $('.menu-item[data-permission]').each(function() {
+                    const requiredPermission = $(this).data('permission');
+                    if (permissions.includes(requiredPermission)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+            
+            // Atualizar badges
+            function updateRequestsBadge(count) {
+                const badge = $('#sidebarRequestsBadge');
+                if (count > 0) {
+                    badge.text(count).show();
+                } else {
+                    badge.hide();
+                }
+            }
+            
+            function updateNotificationsBadge(count) {
+                const badge = $('#sidebarNotificationsBadge');
+                if (count > 0) {
+                    badge.text(count).show();
+                } else {
+                    badge.hide();
+                }
+            }
+            
+            // Mostrar/Ocultar hint baseado no tempo de uso
+            setTimeout(() => {
+                keyboardHint.fadeIn(500);
+                setTimeout(() => {
+                    keyboardHint.fadeOut(1000);
+                }, 5000);
+            }, 2000);
+            
+            // Detectar dispositivo touch para mostrar swipe indicator
+            if ('ontouchstart' in window || navigator.maxTouchPoints) {
+                setTimeout(() => {
+                    swipeIndicator.fadeIn(500);
+                    setTimeout(() => {
+                        swipeIndicator.fadeOut(1000);
+                    }, 5000);
+                }, 3000);
+            }
+            
+            // Animar itens do menu quando abre
+            mobileSidebar.on('transitionend', function() {
+                if (isMenuOpen) {
+                    $('.menu-item').each(function(index) {
+                        $(this).css('animation-delay', `${0.1 + (index * 0.05)}s`);
+                    });
+                }
+            });
+            
+            // Expor funções para uso global
+            window.menuManager = {
+                openMenu: openMenu,
+                closeMenu: closeMenu,
+                toggleMenu: toggleMenu,
+                updateUserInfo: updateSidebarUserInfo,
+                updateRequestsBadge: updateRequestsBadge,
+                updateNotificationsBadge: updateNotificationsBadge,
+                isMenuOpen: () => isMenuOpen
+            };
+            
+            // Função auxiliar para toast
+            function showToast(message, type = 'info') {
+                const toast = $('#toast');
+                toast.text(message)
+                    .removeClass('toast-success toast-error toast-info')
+                    .addClass(`toast-${type}`)
+                    .fadeIn(300);
+                
+                setTimeout(() => {
+                    toast.fadeOut(300);
+                }, 3000);
+            }
+            
+            // Inicializar hint de teclado
+            $(document).on('keydown', function() {
+                keyboardHint.fadeOut(300);
+            });
+            
+            $(document).on('click', function() {
+                keyboardHint.fadeOut(300);
+            });
+
+
+        });
+    </script>
+</body>
+</html>

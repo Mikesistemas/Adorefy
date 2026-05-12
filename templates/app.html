@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="appScreen">
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-church"></i>
+            <h1>ChurchTime</h1>
+        </div>
+        <div class="user-actions">
+            <!-- Botões de gestão para líderes (SEGURO) -->
+            {% if is_leader %}
+            <i class="fas fa-user-clock" id="pendingRequestsBtn" title="Solicitações">
+                {% if pending_requests_count > 0 %}
+                <span class="nav-badge">{{ pending_requests_count }}</span>
+                {% endif %}
+            </i>
+            <i class="fas fa-cog" id="managementBtn" title="Gestão"></i>
+            {% endif %}
+            
+            <i class="fas fa-bell" id="notificationsBtn">
+                {% if unread_notifications > 0 %}
+                <span class="nav-badge">{{ unread_notifications }}</span>
+                {% endif %}
+            </i>
+            <i class="fas fa-cog" id="settingsBtn"></i>
+            <i class="fas fa-sign-out-alt" id="logoutBtn"></i>
+        </div>
+    </div>
+    
+    <div id="appContent"></div>
+    
+    <div class="bottom-nav">
+        <div class="nav-item active" data-nav="home">
+            <i class="fas fa-home nav-icon"></i>
+            <span>Início</span>
+        </div>
+        <div class="nav-item" data-nav="calendar">
+            <i class="fas fa-calendar nav-icon"></i>
+            <span>Calendário</span>
+        </div>
+        <div class="nav-item" data-nav="add">
+            <i class="fas fa-plus-circle nav-icon"></i>
+            <span>Nova</span>
+        </div>
+        
+        <!-- Apenas líderes veem estas opções (SEGURO) -->
+        {% if is_leader %}
+        <div class="nav-item" data-nav="members">
+            <i class="fas fa-users nav-icon"></i>
+            <span>Membros</span>
+        </div>
+        <div class="nav-item" data-nav="ministries">
+            <i class="fas fa-layer-group nav-icon"></i>
+            <span>Ministérios</span>
+        </div>
+        <div class="nav-item" data-nav="pending_requests">
+            <i class="fas fa-clock nav-icon"></i>
+            <span>Solicitações</span>
+            {% if pending_requests_count > 0 %}
+            <div class="nav-badge">{{ pending_requests_count }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Dados injetados de forma segura pelo backend
+window.APP_CONFIG = {
+    currentUser: {{ current_user | tojson }},
+    userPermissions: {{ user_permissions | tojson }},
+    isLeader: {{ is_leader | tojson }},
+    pendingRequestsCount: {{ pending_requests_count }},
+    unreadNotifications: {{ unread_notifications }}
+};
+
+console.log('🔐 Configuração carregada pelo Jinja2:', window.APP_CONFIG);
+</script>
+{% endblock %}
